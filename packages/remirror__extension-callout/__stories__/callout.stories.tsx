@@ -6,7 +6,13 @@ import { EmojiBlockExtension, EmojiExtension } from 'remirror/extensions';
 import data from 'svgmoji/emoji.json';
 import { htmlToProsemirrorNode } from '@remirror/core';
 import { ProsemirrorDevTools } from '@remirror/dev';
-import { Remirror, ThemeProvider, useCommands, useRemirror } from '@remirror/react';
+import {
+  Remirror,
+  ThemeProvider,
+  useCommands,
+  useRemirror,
+  useRemirrorContext,
+} from '@remirror/react';
 
 export default { title: 'Callouts' };
 
@@ -28,7 +34,6 @@ export const Basic: React.FC = () => {
     <ThemeProvider>
       <Remirror manager={manager} autoFocus onChange={onChange} state={state} autoRender='end'>
         <ProsemirrorDevTools />
-
         <Btn />
       </Remirror>
     </ThemeProvider>
@@ -37,15 +42,31 @@ export const Basic: React.FC = () => {
 
 const Btn = () => {
   const commands = useCommands();
-  return (
-    <button
-      onClick={() => {
-        // commands.addEmoji('red_heart');
 
-        commands.toggleCallout({ type: 'success' });
-      }}
-    >
-      111
-    </button>
+  const { schema, view } = useRemirrorContext();
+
+  const insertHeartCallout = () => {
+    const emoji = schema.nodes.emoji.create({ code: '💗' });
+    const emojiBlock = schema.nodes.emojiBlock.create({}, emoji);
+    const callout = schema.nodes.callout.create({}, emojiBlock);
+
+    const selection = view.state.selection;
+    const tr = view.state.tr.insert(selection.head, callout);
+    view.dispatch(tr);
+  };
+
+  return (
+    <>
+      <button
+        onClick={() => {
+          // commands.addEmoji('red_heart');
+
+          commands.toggleCallout({ type: 'success' });
+        }}
+      >
+        111
+      </button>
+      <button onClick={insertHeartCallout}>insert a heart callout</button>
+    </>
   );
 };

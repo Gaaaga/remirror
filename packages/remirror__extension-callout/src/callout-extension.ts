@@ -50,7 +50,7 @@ export class CalloutExtension extends NodeExtension<CalloutOptions> {
   createNodeSpec(extra: ApplySchemaAttributes, override: NodeSpecOverride): NodeExtensionSpec {
     const { defaultType, validTypes } = this.options;
     return {
-      content: 'emojiBlock? block+',
+      content: 'emojiBlock block+',
       defining: true,
       draggable: false,
       ...override,
@@ -111,6 +111,13 @@ export class CalloutExtension extends NodeExtension<CalloutOptions> {
           const { defaultType, validTypes } = this.options;
           console.log('getAttributes', match);
           return { type: getCalloutType(getMatchString(match, 1), validTypes, defaultType) };
+        },
+        getContent: (match) => {
+          console.log('[debug] getContent match:', match);
+          const emojiBlockType = this.store.schema.nodes.emojiBlock as NodeType;
+          const emojiType = this.store.schema.nodes.emoji as NodeType;
+          const emojiBlock = emojiBlockType.create({}, emojiType.create({ code: '⚠️' }));
+          return emojiBlock;
         },
       }),
     ];

@@ -8,6 +8,7 @@ import type {
   MarkType,
   MarkTypeProps,
   NodeTypeProps,
+  ProsemirrorNode,
   RegExpProps,
   TransactionProps,
 } from '@remirror/core-types';
@@ -92,7 +93,9 @@ export interface NodeInputRuleProps
   extends Partial<GetAttributesProps>,
     RegExpProps,
     NodeTypeProps,
-    BaseInputRuleProps {}
+    BaseInputRuleProps {
+  getContent?: (match: string[]) => ProsemirrorNode | undefined;
+}
 
 export interface PlainInputRuleProps extends RegExpProps, BaseInputRuleProps {
   /**
@@ -235,6 +238,7 @@ export function nodeInputRule(props: NodeInputRuleProps): SkippableInputRule {
     regexp,
     type,
     getAttributes,
+    getContent,
     beforeDispatch,
     shouldSkip,
     ignoreWhitespace = false,
@@ -244,6 +248,8 @@ export function nodeInputRule(props: NodeInputRuleProps): SkippableInputRule {
 
   const rule: SkippableInputRule = new InputRule(regexp, (state, match, start, end) => {
     const attributes = isFunction(getAttributes) ? getAttributes(match) : getAttributes;
+    const content = isFunction(getContent) ? getContent(match) : undefined;
+
     const { tr, schema } = state;
     const nodeType: NodeType = isString(type) ? schema.nodes[type] : type;
 
@@ -276,10 +282,10 @@ export function nodeInputRule(props: NodeInputRuleProps): SkippableInputRule {
       message: `No node exists for ${type} in the schema.`,
     });
 
-    const content = nodeType.createAndFill(attributes);
+    const node = nodeType.createAndFill(attributes, content);
 
-    if (content) {
-      tr.replaceRangeWith(nodeType.isBlock ? tr.doc.resolve(start).before() : start, end, content);
+    if (node) {
+      tr.replaceRangeWith(nodeType.isBlock ? tr.doc.resolve(start).before() : start, end, node);
       beforeDispatch?.({ tr, match: [fullMatch, captureGroup ?? ''], start, end });
     }
 

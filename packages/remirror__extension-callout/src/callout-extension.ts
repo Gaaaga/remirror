@@ -141,6 +141,25 @@ export class CalloutExtension extends NodeExtension<CalloutOptions> {
     return toggleWrap(this.type, attributes);
   }
 
+  @command()
+  insertEmojiCallout(code: string): CommandFunction {
+    return ({ view }) => {
+      if (!view) {
+        return false;
+      }
+
+      const schema = view.state.schema;
+      const emoji = schema.nodes.emoji!.create({ code: '💗' });
+      const emojiBlock = schema.nodes.emojiBlock!.create({}, emoji);
+      const callout = schema.nodes.callout!.create({}, emojiBlock);
+
+      const selection = view.state.selection;
+      const tr = view.state.tr.insert(selection.head, callout);
+      view.dispatch(tr);
+      return true;
+    };
+  }
+
   /**
    * Update the callout at the current position. Primarily this is used
    * to change the type.

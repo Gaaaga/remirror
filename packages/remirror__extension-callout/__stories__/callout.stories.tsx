@@ -55,6 +55,10 @@ const Btn = () => {
     view.dispatch(tr);
   };
 
+  const insertHeartCalloutV2 = () => {
+    commands.insertEmojiCallout('💗');
+  };
+
   return (
     <>
       <button
@@ -66,7 +70,8 @@ const Btn = () => {
       >
         111
       </button>
-      <button onClick={insertHeartCallout}>insert a heart callout</button>
+      <button onClick={insertHeartCallout}>insert a heart callout v1 </button>
+      <button onClick={insertHeartCalloutV2}>insert a heart callout v2 </button>
     </>
   );
 };

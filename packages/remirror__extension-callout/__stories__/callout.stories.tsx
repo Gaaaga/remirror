@@ -2,7 +2,7 @@ import 'remirror/styles/all.css';
 
 import { EmojiButton } from '@joeattardi/emoji-button';
 import { Blobmoji } from '@svgmoji/blob';
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { CalloutExtension } from 'remirror/extensions';
 import svgmojiData from 'svgmoji/emoji.json';
 import { htmlToProsemirrorNode, ProsemirrorNode } from '@remirror/core';
@@ -23,6 +23,10 @@ const EmojiPicker = () => {
   const { view } = useRemirrorContext();
   const pos = useRef(-1);
 
+  const viewPosAtDOM = useMemo(() => {
+    return view.posAtDOM.bind(view);
+  }, [view]);
+
   const handleClickEmoji = useCallback(
     (e: MouseEvent) => {
       const target = e.target as HTMLElement;
@@ -36,11 +40,11 @@ const EmojiPicker = () => {
       /**
        * Find the document position of the click element.
        */
-      pos.current = view.posAtDOM(target, 0);
+      pos.current = viewPosAtDOM(target, 0);
 
       pickerRef.current.togglePicker(target);
     },
-    [view],
+    [viewPosAtDOM],
   );
 
   /**
